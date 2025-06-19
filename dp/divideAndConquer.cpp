@@ -1,22 +1,28 @@
-int dcp(int st,int ed,int opt1,int opt2,int n)
-{
-    if(st>ed)return opt1;
-    int mid=(st+ed)/2;
-    int opt=opt1;
-    ll anss=inf;
-    ll cost=ans(1,1,n,min(mid,opt2)+1,mid,mid);
-    for(int i=min(opt2,mid); i>=opt1; i--)
-    {
-        if(nxt[i]<=mid)cost=cost+nxt[i]-i;
-        if(cost+tem[i-1]<anss)
-        {
-            anss=cost+tem[i-1];
-            opt=i;
-        }
-    }
-    tk[mid]=anss;
-    if(st==ed)return opt;
-    opt1=dcp(st,mid-1,opt1,opt,n);
-    opt2=dcp(mid+1,ed,opt,opt2,n);
-    return opt2;
+void yo(int i, int l, int r, int optl, int optr) {
+	if(l > r) return;
+	int mid = (l + r) / 2;
+	dp[i][mid] = inf; // for maximum cost change it to 0
+	int opt = -1;
+	for(int k = optl; k <= min(mid - 1, optr); k++) {
+		int c = dp[i - 1][k] + cost(k + 1, mid);
+		if(c < dp[i][mid]) { // for maximum cost just change < to > only and rest of the algo should not be changed
+			dp[i][mid] = c;
+			opt = k;
+		}
+	}
+	// for opt[1..j] <= opt[1...j+1]
+	if (opt == -1) {
+    // if we can't divide into k parts, then go right
+		yo(i, mid + 1, r, optl, optr);
+		return;
+	}
+	yo(i, l, mid - 1, optl, opt);
+	yo(i, mid + 1, r, opt, optr);
+
+	// for opt[1...j] >= opt[1...j+1]
+	// yo(i, l, mid-1, opt, optr);
+	// yo(i, mid+1, r, optl, opt);
+
 }
+//for(i = 1; i <= n; i++) dp[1][i] = cost(1, i);
+//for(i = 2; i <= k; i++) yo(i, 1, n, 1, n);
