@@ -1,61 +1,33 @@
-const ll M=1e9+7;
-const int N=103;
-int m;
-ll mat[N][N];
-ll ans[N][N];
-void pow(int po)
-{
-    for(int i=0; i<m; i++)
-    {
-        for(int j=0; j<m; j++)ans[i][j]=(i==j);
-    }
-    while(po)
-    {
-        if(po%2)
-        {
-            ll tem[m][m];
-            for(int i=0; i<m; i++)
-            {
-                for(int j=0; j<m; j++)
-                {
-                    tem[i][j]=0;
-                    for(int k=0; k<m; k++)
-                    {
-                        tem[i][j]+=mat[i][k]*ans[k][j];
-                        tem[i][j]%=M;
-                    }
-                }
-            }
-            for(int i=0; i<m; i++)
-            {
-                for(int j=0; j<m; j++)
-                {
-                    ans[i][j]=tem[i][j];
-                }
-            }
-        }
-        po=po/2;
-        ll tem[m][m];
-        for(int i=0; i<m; i++)
-        {
-            for(int j=0; j<m; j++)
-            {
-                tem[i][j]=0;
-                for(int k=0; k<m; k++)
-                {
-                    tem[i][j]+=mat[i][k]*mat[k][j];
-                    tem[i][j]%=M;
-                }
-            }
-        }
-        for(int i=0; i<m; i++)
-        {
-            for(int j=0; j<m; j++)
-            {
-                mat[i][j]=tem[i][j];
-            }
-        }
-    }
-    return ;
+vector<vector<ll>> matmul(const vector<vector<ll>> &A,
+                          const vector<vector<ll>> &B) {
+    vector<vector<ll>> C(3, vector<ll>(3, 0));
+    for (int i = 0; i < 3; i++)
+        for (int k = 0; k < 3; k++)
+            if (A[i][k])
+                for (int j = 0; j < 3; j++)
+                    C[i][j] = (C[i][j] + A[i][k] * B[k][j]) % MOD;
+    return C;
 }
-
+ 
+vector<vector<ll>> matpow(vector<vector<ll>> n, ll k) {
+    vector<vector<ll>> ans(3, vector<ll>(3, 0));
+    for (int i = 0; i < 3; i++) ans[i][i] = 1;
+ 
+    while (k > 0) {
+        if (k & 1) ans = matmul(ans, n);
+        n = matmul(n, n);
+        k >>= 1;
+    }
+    return ans;
+}
+ 
+ll qp(ll a,ll b)
+{
+    ll x=1; a%=MOD;
+    while(b)
+    {
+        if(b&1) x=x*a%MOD;
+        a=a*a%MOD; b>>=1;
+    }
+    return x;
+}
