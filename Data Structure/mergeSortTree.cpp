@@ -1,65 +1,56 @@
-vector<pair<int,int>>tree[4*N];
-vector<ll>pre[4*N];
-int nxt[N]; 
-vector<pair<int,int>>  make(int node,int i,int n)
-{
-    if(i==n)
-    {
-        tree[node].push_back({nxt[i],i});
-        pre[node].push_back(nxt[i]-i);
-        return tree[node];
-    }
-    int mid=(i+n)/2;
-    vector<pair<int,int>>p=make(node*2,i,mid);
-    vector<pair<int,int>>q=make(node*2+1,mid+1,n);
-    int s=0,t=0;
-    while(1)
-    {
-        if(s==p.size())
-        {
-            while(t!=q.size())tree[node].push_back(q[t]),t++;
-            break;
-        }
-        else if(t==q.size())
-        {
-            while(s!=p.size())tree[node].push_back(p[s]),s++;
-            break;
-        }
-        else if(p[s]<q[t])tree[node].push_back(p[s]),s++;
-        else tree[node].push_back(q[t]),t++;
-    }
-    for(int i=0; i<tree[node].size(); i++)
-    {
-        pre[node].push_back(0);
-        pre[node][i]=tree[node][i].first-tree[node][i].second;
-        if(i)pre[node][i]+=pre[node][i-1];
-    }
-    return tree[node];
+#include <bits/stdc++.h>
+using namespace std;
+const int N=1e5+5;
+int n,q,a[N];
+multiset<int> seg[4*N+5];
+void build(int node,int l,int r){
+    if (l==r){
+        seg[node].insert(a[l]);
+        return;
+    }int mid=(l+r)/2;
+    build(node*2,l,mid);
+    build(node*2+1,mid+1,r);
+    for (int i=l;i<=r;i++) seg[node].insert(a[i]);
+    return;
 }
-ll ans(int node,int i,int n,int p,int q,int last)
-{
-    if(n<p||i>q)return 0;
-    if(i>=p&&n<=q)
-    {
-        int st=0,ed=n-i,mid;
-        ll res=0;
-        while(st<=ed)
-        {
-            mid=(st+ed)/2;
-            if(tree[node][mid].first<=last)
-            {
-                res=pre[node][mid];
-                st=mid+1;
-            }
-            else
-            {
-                ed=mid-1;
-            }
-        }
-        return res;
+void edit(int node,int l,int r,int idx,int val){
+    if (l==r){
+        seg[node].erase(a[idx]);
+        seg[node].insert(val);
+        return;
+    }int mid=(l+r)/2;
+    if (idx<=mid) edit(node*2,l,mid,idx,val);
+    else edit(node*2+1,mid+1,r,idx,val);
+    seg[node].erase(a[idx]);
+    seg[node].insert(val);
+    return;
+}
+int query(int node,int l,int r,int lx,int rx,int x){
+    if (l>rx || r<lx) return INT_MAX;
+    if (l>=lx && r<=rx){
+        auto it=seg[node].lower_bound(x);
+        if (it==seg[node].end()) return INT_MAX;
+        return *it;
+    }int mid=(l+r)/2;
+    return min(query(node*2,l,mid,lx,rx,x),query(node*2+1,mid+1,r,lx,rx,x));
+}
+int32_t main(){
+    ios_base::sync_with_stdio(false);cin.tie(NULL);cout.tie(NULL);
+    cin>>n>>q;
+    for (int i=1;i<=n;i++) cin>>a[i];
+    build(1,1,n);
+    while (q--){
+        bool t;cin>>t;
+        if (!t){
+            int idx,val;
+            cin>>idx>>val;
+            edit(1,1,n,idx,val);
+            a[idx]=val;
+            continue;
+        }int l,r,x;cin>>l>>r>>x;
+        int y=query(1,1,n,l,r,x);
+        if (y==INT_MAX) cout<<-1<<endl;
+        else cout<<y<<endl;
     }
-    int mid=(i+n)/2;
-    ll pp=ans(node*2,i,mid,p,q,last);
-    ll qq=ans(node*2+1,mid+1,n,p,q,last);
-    return (pp+qq);
+    return 0;
 }
